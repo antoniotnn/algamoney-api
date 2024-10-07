@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,7 +19,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -30,13 +31,8 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 @EnableWebSecurity
 public class ResourceServerConfig extends WebSecurityConfigurerAdapter{
 
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication()
-                .withUser("admin@algamoney.com")
-                .password("admin")
-                .roles("ROLE");
-    }
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -66,13 +62,12 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter{
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
 
-    @Bean
     @Override
-    public UserDetailsService userDetailsServiceBean() throws Exception {
-        return super.userDetailsServiceBean();
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
     }
 
     private JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -96,4 +91,5 @@ public class ResourceServerConfig extends WebSecurityConfigurerAdapter{
 
         return jwtAuthenticationConverter;
     }
+
 }
