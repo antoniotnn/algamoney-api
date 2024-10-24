@@ -1,8 +1,6 @@
 package com.example.algamoney.api.resource;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -36,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.algamoney.api.dto.Anexo;
 import com.example.algamoney.api.dto.LancamentoEstatisticaCategoria;
 import com.example.algamoney.api.dto.LancamentoEstatisticaDia;
 import com.example.algamoney.api.event.RecursoCriadoEvent;
@@ -46,6 +45,7 @@ import com.example.algamoney.api.repository.filter.LancamentoFilter;
 import com.example.algamoney.api.repository.projection.ResumoLancamento;
 import com.example.algamoney.api.service.LancamentoService;
 import com.example.algamoney.api.service.exception.PessoaInexistenteOuInativaException;
+import com.example.algamoney.api.storage.S3;
 
 @RestController
 @RequestMapping("/lancamentos")
@@ -63,14 +63,14 @@ public class LancamentoResource {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private S3 s3;
+
     @PostMapping("/anexo")
     @PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and hasAuthority('SCOPE_write')")
-    public String uploadAnexo(@RequestParam MultipartFile anexo) throws IOException {
-        OutputStream out = new FileOutputStream(
-                "/home/alexandre/Desktop/anexo--" + anexo.getOriginalFilename());
-        out.write(anexo.getBytes());
-        out.close();
-        return "ok";
+    public Anexo uploadAnexo(@RequestParam MultipartFile anexo) throws IOException {
+        String nome = s3.salvarTemporariamente(anexo);
+        return new Anexo(nome, s3.configurarUrl(nome));
     }
 
     @GetMapping("/relatorios/por-pessoa")
