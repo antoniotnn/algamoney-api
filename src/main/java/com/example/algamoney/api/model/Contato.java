@@ -14,22 +14,21 @@ import javax.validation.constraints.NotEmpty;
 @Entity
 @Table(name = "contato")
 public class Contato {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long codigo;
-	
+
 	@NotEmpty
 	private String nome;
-	
+
 	@Email
 	@NotNull
 	private String email;
-	
+
 	@NotEmpty
 	private String telefone;
-	
-	@NotNull
+
 	@ManyToOne
 	@JoinColumn(name = "codigo_pessoa")
 	private Pessoa pessoa;
