@@ -52,7 +52,7 @@ public class LancamentoService {
     @Autowired
     private Mailer mailer;
 
-    @Autowired
+//    @Autowired
     private S3 s3;
 
     @Scheduled(cron = "0 0 6 * * *")

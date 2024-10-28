@@ -17,13 +17,13 @@ import com.amazonaws.services.s3.model.lifecycle.LifecycleFilter;
 import com.amazonaws.services.s3.model.lifecycle.LifecycleTagPredicate;
 import com.example.algamoney.api.config.property.AlgamoneyApiProperty;
 
-@Configuration
+//@Configuration
 public class S3Config {
 
-	@Autowired
+//	@Autowired
 	private AlgamoneyApiProperty property;
 
-	@Bean
+//	@Bean
 	public AmazonS3 amazonS3() {
 		AWSCredentials credenciais = new BasicAWSCredentials(
 				property.getS3().getAccessKeyId(), property.getS3().getSecretAccessKey());

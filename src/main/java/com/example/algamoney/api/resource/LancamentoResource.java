@@ -63,7 +63,7 @@ public class LancamentoResource {
     @Autowired
     private MessageSource messageSource;
 
-    @Autowired
+//    @Autowired
     private S3 s3;
 
     @PostMapping("/anexo")
