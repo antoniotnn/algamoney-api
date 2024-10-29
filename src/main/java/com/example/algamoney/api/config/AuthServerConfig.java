@@ -1,20 +1,20 @@
 package com.example.algamoney.api.config;
 
-import com.example.algamoney.api.config.property.AlgamoneyApiProperty;
-import com.example.algamoney.api.security.UsuarioSistema;
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.KeyUse;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import java.io.InputStream;
+import java.security.KeyStore;
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,11 +35,12 @@ import org.springframework.security.oauth2.server.authorization.config.ProviderS
 import org.springframework.security.oauth2.server.authorization.config.TokenSettings;
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.time.Duration;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import com.example.algamoney.api.config.property.AlgamoneyApiProperty;
+import com.example.algamoney.api.security.UsuarioSistema;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 
 @Configuration
 @Profile("oauth-security")
@@ -68,8 +69,8 @@ public class AuthServerConfig {
                         .refreshTokenTimeToLive(Duration.ofDays(24))
                         .build())
                 .clientSettings(ClientSettings.builder()
-                                .requireAuthorizationConsent(true)
-                                .build())
+                        .requireAuthorizationConsent(true)
+                        .build())
                 .build();
 
         RegisteredClient mobileClient = RegisteredClient
@@ -123,13 +124,19 @@ public class AuthServerConfig {
     }
 
     @Bean
-    public JWKSet jwkSet() throws JOSEException {
-        RSAKey rsa = new RSAKeyGenerator(2048)
-                .keyUse(KeyUse.SIGNATURE)
-                .keyID(UUID.randomUUID().toString())
-                .generate();
+    public JWKSet jwkSet() throws Exception {
+        final InputStream inputStream = new ClassPathResource("keystore/algamoney.jks").getInputStream();
 
-        return new JWKSet(rsa);
+        final KeyStore keyStore = KeyStore.getInstance("JKS");
+        keyStore.load(inputStream, "123456".toCharArray());
+
+        RSAKey rsaKey = RSAKey.load(
+                keyStore,
+                "algamoney",
+                "123456".toCharArray()
+        );
+
+        return new JWKSet(rsaKey);
     }
 
     @Bean
